@@ -1,0 +1,10 @@
+a1 a4
+b6 b7
+c1 c1
+c3 c3
+d5 e5
+e1 e3
+d7 e7
+g3 g5
+h1 h1
+h8 h8
