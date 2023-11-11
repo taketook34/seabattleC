@@ -6,12 +6,14 @@ const int MAPSIZE =8;
 const int SHIPSNUMBER = 10;
 
 struct Ship {
-    char letter1;
+    // СДЕЛАТЬ НА БУДУЩЕЕ: написать функцию которая будет из цифры в букву
+    int letter1;
     int x1;
-    char letter2;
+    int letter2;
     int x2;
-    bool hitted;
-    bool killed;
+    int lenght;
+    // int hitted;
+    // bool killed;
 };
 
 int getY(char letter) {
@@ -50,8 +52,8 @@ void createShipsMap(char rendermap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUM
 
 
     for (i = 0; i < SHIPSNUMBER; i++) {
-        startY = getY(ships[i].letter1);
-        finishY = getY(ships[i].letter2);
+        startY = ships[i].letter1;
+        finishY = ships[i].letter2;
         startX = ships[i].x1 - 1;
         finishX = ships[i].x2 - 1;
 
@@ -109,7 +111,39 @@ void createMaps(char newmap[MAPSIZE][MAPSIZE]) {
     }
 }
 
+int checkShoot(char checkmap[MAPSIZE][MAPSIZE], char shootmap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUMBER], int shootx, int shooty) {
+    // checkmap жертвы, shootmap среляющего
+    if (shootmap[shooty][shootx] == "=" || shootmap[shooty][shootx] == "x" ) {
+        return -1;
+    } else {
+        char result = checkmap[shooty][shootx];
 
+        if (result == "~") {
+            shootmap[shooty][shootx] = "=";
+            checkmap[shooty][shootx] = "=";
+            return 0;
+
+        } else if (result == "o") {
+            struct Ship gship;
+            for (int i = 0; i < SHIPSNUMBER; i++) {
+                gship = ships[i];
+                if (shooty >= getY(gship.letter1) && shooty <= getY(gship.letter2) && shootx >= gship.x1 && shootx <= gship.x2) {
+                    gship.lenght -= 1;
+                    shootmap[shooty][shootx] = "x";
+                    checkmap[shooty][shootx] = "x";
+                    if (gship.lenght == 0) {
+                        return 2; 
+                    } else {
+                        return 1;
+                    }
+                    
+                }
+            }
+
+        }
+    }
+    
+}
 
 
 
@@ -133,19 +167,38 @@ int main() {
     fclose(file);
 
 
-    int a, b;
+    int xa, xb, ya, yb;
     // запис кораблів
     for (int i = 0; i < SHIPSNUMBER; i++) {
-        // тут также сделать для корбалей для B
-        a = line[i][1] - '0';
-        b = line[i][3] - '0';
-    
-        shipsA[i].letter1 = line[i][0];
-        shipsA[i].x1 = a;
-        shipsA[i].letter2 = line[i][2];
-        shipsA[i].x2 = b;
-        shipsA[i].hitted = false;
-        shipsA[i].killed = false;
+        // СДЕЛАТЬ В БУДУЩЕМ: тут также сделать для корбалей для B и переписать что бы они были от меньшей к большей координате
+        xa = line[i][1] - '0';
+        xb = line[i][3] - '0';
+        xa -= 1;
+        xb -= 1;
+        ya = getY(line[i][0]);
+        yb = getY(line[i][2]);
+
+        if (xa == xb && yb < ya) {
+            shipsA[i].letter1 = yb;
+            shipsA[i].x1 = xb;
+            shipsA[i].letter2 = ya;
+            shipsA[i].x2 = xa;
+            shipsA[i].lenght = ya - yb + 1;
+        } else if (yb == ya && xb < xa) {
+            shipsA[i].letter1 = yb;
+            shipsA[i].x1 = xb;
+            shipsA[i].letter2 = ya;
+            shipsA[i].x2 = xa;
+            shipsA[i].lenght = xa - xb + 1;
+        } else {
+            shipsA[i].letter1 = ya;
+            shipsA[i].x1 = xa;
+            shipsA[i].letter2 = yb;
+            shipsA[i].x2 = xb;
+            shipsA[i].lenght = (yb - ya) + (xb - xa) + 1;
+        }
+        
+        printf("%d\n", shipsA[i].lenght);
         //printf("Ship %d coordinates %c:%d - %c:%d\n", i+1, shipsA[i].letter1, shipsA[i].x1, shipsA[i].letter2, shipsA[i].x2);
     }
 
@@ -159,6 +212,25 @@ int main() {
     createShipsMap(Bloc, shipsA);    
     createMaps(Battack);
     showShips(Bloc);
+
+    // НАЧАЛО ИГРЫ
+
+
+    char shoot_letter_y;
+    int shoot_number_x, shoot_number_y;
+
+    printf("Hello, everyone! Welocome to Sea Battle game!\nWrite files for getting patterns: \n");
+    // СДЕЛАТЬ В БУДУЩЕМ: Тут должен быть реализован выбор файла для каждого игрока и взять файл
+    // printf("Okay, let's start\n");
+    // printf("User A, type letter to shoot: ");
+    // scanf(" %c", &shoot_letter_y);  // СДЕЛАТЬ В БУДУЩЕМ: добавить проверку что бы буква проверялась
+    // shoot_number_y = getY(shoot_letter_y);
+
+    // printf("Type number to shoot: ");
+    // scanf(" %d", &shoot_number_x);
+
+    // printf("You pick %c:%d - you get %d", shoot_letter_y, shoot_number_x, 1);
+
 
     return 0;
 }
