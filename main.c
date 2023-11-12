@@ -54,8 +54,8 @@ void createShipsMap(char rendermap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUM
     for (i = 0; i < SHIPSNUMBER; i++) {
         startY = ships[i].letter1;
         finishY = ships[i].letter2;
-        startX = ships[i].x1 - 1;
-        finishX = ships[i].x2 - 1;
+        startX = ships[i].x1;
+        finishX = ships[i].x2;
 
         rendermap[startY][startX] = 'o';
         rendermap[finishY][finishX] = 'o';
@@ -111,39 +111,49 @@ void createMaps(char newmap[MAPSIZE][MAPSIZE]) {
     }
 }
 
-int checkShoot(char checkmap[MAPSIZE][MAPSIZE], char shootmap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUMBER], int shootx, int shooty) {
-    // checkmap жертвы, shootmap среляющего
-    if (shootmap[shooty][shootx] == "=" || shootmap[shooty][shootx] == "x" ) {
-        return -1;
-    } else {
-        char result = checkmap[shooty][shootx];
-
-        if (result == "~") {
-            shootmap[shooty][shootx] = "=";
-            checkmap[shooty][shootx] = "=";
-            return 0;
-
-        } else if (result == "o") {
-            struct Ship gship;
-            for (int i = 0; i < SHIPSNUMBER; i++) {
-                gship = ships[i];
-                if (shooty >= getY(gship.letter1) && shooty <= getY(gship.letter2) && shootx >= gship.x1 && shootx <= gship.x2) {
-                    gship.lenght -= 1;
-                    shootmap[shooty][shootx] = "x";
-                    checkmap[shooty][shootx] = "x";
-                    if (gship.lenght == 0) {
-                        return 2; 
-                    } else {
-                        return 1;
-                    }
-                    
-                }
-            }
-
-        }
-    }
-    
+char checkShoot(char checkmap[MAPSIZE][MAPSIZE], int shootx, int shooty) {
+    return checkmap[shooty][shootx];
 }
+
+// char registerShoot(char checkmap[MAPSIZE][MAPSIZE], char shootmap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUMBER], int shootx, int shooty) {
+//     // checkmap жертвы, shootmap среляющего
+//     // -1, 3- уже проверено
+//     // 0, 4 - мимо
+//     // 1, 5 - ранен
+//     // 2, 6 - убит
+//     int to_return;
+//     if (shootmap[shooty][shootx] == "=" || shootmap[shooty][shootx] == "x" ) {
+//         return "a";
+//     } else {
+//         char result = checkmap[shooty][shootx];
+
+//         if (result == "~") {
+//             shootmap[shooty][shootx] = "=";
+//             checkmap[shooty][shootx] = "=";
+//             return "o";
+
+//         } else if (result == "o") {
+//             struct Ship gship;
+//             for (int i = 0; i < SHIPSNUMBER; i++) {
+//                 gship = ships[i];
+//                 if (shooty >= getY(gship.letter1) && shooty <= getY(gship.letter2) && shootx >= gship.x1 && shootx <= gship.x2) {
+//                     gship.lenght -= 1;
+//                     shootmap[shooty][shootx] = "x";
+//                     checkmap[shooty][shootx] = "x";
+//                     if (gship.lenght == 0) {
+//                         return "k"; 
+//                     } else {
+//                         return  "h";
+//                     }
+                    
+//                 }
+//             }
+
+//         }
+//     }
+//     //return to_return;
+    
+// }
 
 
 
@@ -190,6 +200,9 @@ int main() {
             shipsA[i].letter2 = ya;
             shipsA[i].x2 = xa;
             shipsA[i].lenght = xa - xb + 1;
+        } else if (yb != ya && xb != xa) {
+            perror("Error in file");
+            return 1;
         } else {
             shipsA[i].letter1 = ya;
             shipsA[i].x1 = xa;
@@ -197,8 +210,8 @@ int main() {
             shipsA[i].x2 = xb;
             shipsA[i].lenght = (yb - ya) + (xb - xa) + 1;
         }
-        
-        printf("%d\n", shipsA[i].lenght);
+
+        //printf("%d\n", shipsA[i].lenght);
         //printf("Ship %d coordinates %c:%d - %c:%d\n", i+1, shipsA[i].letter1, shipsA[i].x1, shipsA[i].letter2, shipsA[i].x2);
     }
 
@@ -218,18 +231,23 @@ int main() {
 
     char shoot_letter_y;
     int shoot_number_x, shoot_number_y;
+    char resultOfShoot;
 
     printf("Hello, everyone! Welocome to Sea Battle game!\nWrite files for getting patterns: \n");
     // СДЕЛАТЬ В БУДУЩЕМ: Тут должен быть реализован выбор файла для каждого игрока и взять файл
-    // printf("Okay, let's start\n");
-    // printf("User A, type letter to shoot: ");
-    // scanf(" %c", &shoot_letter_y);  // СДЕЛАТЬ В БУДУЩЕМ: добавить проверку что бы буква проверялась
-    // shoot_number_y = getY(shoot_letter_y);
+    printf("Okay, let's start\n");
+    printf("User A, type letter to shoot: ");
+    scanf(" %c", &shoot_letter_y);  // СДЕЛАТЬ В БУДУЩЕМ: добавить проверку что бы буква проверялась
+    shoot_number_y = getY(shoot_letter_y);
 
-    // printf("Type number to shoot: ");
-    // scanf(" %d", &shoot_number_x);
+    printf("Type number to shoot: ");
+    scanf(" %d", &shoot_number_x);
 
-    // printf("You pick %c:%d - you get %d", shoot_letter_y, shoot_number_x, 1);
+    //resultOfShoot = checkShoot(Bloc, Aattack, shipsA, shoot_number_x - 1 , shoot_number_y - 1); // shipsA - только здесь это корабли жертвы
+    resultOfShoot = checkShoot(Bloc, shoot_number_x -1, shoot_number_y);
+
+    printf("You pick %c:%d - you get %c\n", shoot_letter_y, shoot_number_x, resultOfShoot);
+    // выводит аски код числа
 
 
     return 0;
