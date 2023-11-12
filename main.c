@@ -8,6 +8,7 @@ int main() {
     char Aloc[MAPSIZE][MAPSIZE], Aattack[MAPSIZE][MAPSIZE];
     char Bloc[MAPSIZE][MAPSIZE], Battack[MAPSIZE][MAPSIZE];
     struct Ship shipsA[SHIPSNUMBER], shipsB[SHIPSNUMBER];
+    struct FireShoot fireshoot;
 
 
     FILE *file = fopen("write.txt", "r");
@@ -91,10 +92,15 @@ int main() {
 
     // shipsA - только здесь это корабли жертвы
     resultOfShoot = checkShoot(Bloc, shoot_number_x -1, shoot_number_y);
+    fireshoot.x = shoot_number_x - 1;
+    fireshoot.y = shoot_number_y;
+    fireshoot.res = resultOfShoot;
 
-    printf("You pick %c:%d - you get %c\n", shoot_letter_y, shoot_number_x, resultOfShoot);
+
+    printf("You pick %c:%d\n", shoot_letter_y, shoot_number_x);
+    registerShoot(Bloc, Aattack, shipsA, fireshoot);
     // выводит аски код числа
-
+    showShips(Bloc);
 
     return 0;
 }
