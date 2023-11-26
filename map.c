@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "map.h"
+#include "config.h"
 
+const char alphletters[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
 int getY(char letter) {
     switch (letter) {
@@ -82,8 +84,17 @@ void createShipsMap(char rendermap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUM
 }
 
 void showShips(char showmap[MAPSIZE][MAPSIZE]) {
-    for (int i = 0; i < MAPSIZE; i++) {
-        for (int j = 0; j < MAPSIZE; j++) {
+    int i, j;
+    printf("  ");
+
+    for (i =1; i <= MAPSIZE; i++) {
+        printf("%d ", i);
+    }
+    printf("\n");
+
+    for (i = 0; i < MAPSIZE; i++) {
+        printf("%c ", alphletters[i]);
+        for (j = 0; j < MAPSIZE; j++) {
             printf("%c ", showmap[i][j]);
         }
         printf("\n");
@@ -103,66 +114,79 @@ char checkShoot(char checkmap[MAPSIZE][MAPSIZE], int shootx, int shooty) {
     return checkmap[shooty][shootx];
 }
 
-void setcheckedhits(char setmap[MAPSIZE][MAPSIZE], int shootx, int shooty) {
+
+
+void setkilledships(char attackmap[MAPSIZE][MAPSIZE], int xa, int ya, int xb, int yb) {
     int i, j, startX, startY, finishX, finishY;
-    // определим границы для X
-    if (shootx == 0) {
-        startX = 0;
-        finishX = startX + 1;
-    } else if (shootx == MAPSIZE - 1) {
-        finishX = MAPSIZE - 1;
-        startX = finishX - 1; 
+    if (xa == 0) {
+        startX = xa;
     } else {
-        startX = shootx - 1;
-        finishX = shootx + 1;
+        startX = xa - 1;
     }
 
-    // определим границы для Y
-    if (shooty == 0) {
-        startY = 0;
-        finishY = startY + 1;
-    } else if (shooty == MAPSIZE - 1) {
-        finishY = MAPSIZE - 1;
-        startY = finishY - 1; 
+    if (xb == MAPSIZE - 1) {
+        finishX = xb;
     } else {
-        startY = shooty - 1;
-        finishY = shooty + 1;
+        finishX = xb + 1;
     }
-    //printf("%d:%d = %d:%d - %d:%d\n", shooty, shootx, startY, finishY, startX, startY);
+
+    if (ya == 0) {
+        startY = ya;
+    } else {
+        startY = ya - 1;
+    }
+
+    if (yb == MAPSIZE - 1) {
+        finishY = yb;
+    } else {
+        finishY = yb + 1;
+    }
+
     for (i = startY; i <= finishY; i++) {
         for (j = startX; j <= finishX; j++) {
-            if (setmap[i][j] == WATER) {
-                setmap[i][j] = AIMWATER;
+            if (attackmap[i][j] == WATER) {
+                
+                attackmap[i][j] = AIMWATER;
             }
         }
     }
+
+
 }
 
-void registerShoot(char checkmap[MAPSIZE][MAPSIZE], char shootmap[MAPSIZE][MAPSIZE], struct Ship ships[SHIPSNUMBER], struct FireShoot fireshoot) {
-    struct Ship gship;
+void registerShoot(char checkmap[MAPSIZE][MAPSIZE], char shootmap[MAPSIZE][MAPSIZE], int *score, struct Ship ships[SHIPSNUMBER], struct FireShoot fireshoot) {
+    int gletter1, gletter2, gx1, gx2;
     if (fireshoot.res == SHIP) {
         
         for (int i = 0; i < SHIPSNUMBER; i++) {
-            gship = ships[i];
-            if (fireshoot.y >= gship.letter1 && fireshoot.y <= gship.letter2 && fireshoot.x >= gship.x1 && fireshoot.x <= gship.x2) {
 
-                gship.lenght -= 1;
+            gletter1 = ships[i].letter1;
+            gletter2 = ships[i].letter2;
+            gx1 = ships[i].x1;
+            gx2 = ships[i].x2;
+
+            if (fireshoot.y >= gletter1 && fireshoot.y <= gletter2 && fireshoot.x >= gx1 && fireshoot.x <= gx2) {
+                ships[i].lenght--;// -= 1;
                 shootmap[fireshoot.y][fireshoot.x] = AIMSHIP;
                 checkmap[fireshoot.y][fireshoot.x] = AIMSHIP;
-                setcheckedhits(checkmap, fireshoot.x, fireshoot.y);
 
-                if (gship.lenght == 0) {
-                    printf("You killed ship"); 
-
+                if (ships[i].lenght == 0) {
+                    printf("You killed ship");
+                    setkilledships(shootmap, gx1, gletter1, gx2, gletter2);
+                    setkilledships(checkmap, gx1, gletter1, gx2, gletter2);
+                    (*score) += 1; // прибавляем счет + 1
+                    
                 } else {
                     printf("You aimed ship");
+                    // printf(" Last: %d", gship.lenght);
                 }
-                
+                printf("\nYou can shoot one more");
             }
         }
 
     } else if (fireshoot.res == AIMWATER || fireshoot.res == AIMSHIP) {
         printf("You've already shooted here");
+        printf("\nYou can shoot one more");
 
     } else {
         shootmap[fireshoot.y][fireshoot.x] = AIMWATER;
